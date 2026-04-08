@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Obsidian Quick Sync</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font: 16px/1.5 system-ui, sans-serif; max-width: 760px; margin: 3rem auto; padding: 0 1rem; }
+  h1 { margin-bottom: .25rem; }
+  .hint { color: #888; margin-top: 0; }
+  ul { padding-left: 1.2rem; }
+  li { margin: .35rem 0; }
+  a { text-decoration: none; }
+  a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+  <h1>Obsidian Quick Sync</h1>
+  <p class="hint">Pages exported from Obsidian. Drop an <code>.html</code> file into the watch folder and it appears here.</p>
+  <ul id="pages">
+    <!-- Pages are listed in pages.json and rendered at runtime. -->
+  </ul>
+  <script>
+    fetch('pages.json', { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : [])
+      .then(list => {
+        const ul = document.getElementById('pages');
+        if (!list.length) {
+          ul.innerHTML = '<li><em>No pages yet. Drop an HTML file into the watch folder.</em></li>';
+          return;
+        }
+        ul.innerHTML = list
+          .sort((a, b) => b.added.localeCompare(a.added))
+          .map(p => `<li><a href="${p.file}">${p.title}</a> <small style="color:#888">— ${p.added}</small></li>`)
+          .join('');
+      })
+      .catch(() => {
+        document.getElementById('pages').innerHTML = '<li><em>No pages yet.</em></li>';
+      });
+  </script>
+</body>
+</html>

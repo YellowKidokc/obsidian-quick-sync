@@ -45,8 +45,16 @@ function Sync-Now($reason) {
     if (-not $status) { Log "No changes to commit ($reason)"; return }
     git add -A | Out-Null
     $msg = "sync: $reason ({0})" -f (Get-Date -Format 'yyyy-MM-dd HH:mm')
-    git commit -m $msg | Out-Null
-    git push origin HEAD | Out-Null
+    git -c user.email="davidokc28@gmail.com" -c user.name="YellowKidokc" commit -m $msg | Out-Null
+    # Push using gh's token for the active account (YellowKidokc) to avoid
+    # credential-manager picking up the wrong stored account.
+    $token = (gh auth token 2>$null)
+    if ($token) {
+      $pushUrl = "https://YellowKidokc:$token@github.com/YellowKidokc/obsidian-quick-sync.git"
+      git push $pushUrl HEAD:master 2>&1 | Out-Null
+    } else {
+      git push origin HEAD 2>&1 | Out-Null
+    }
     Log "Pushed: $msg"
   } catch {
     Log "ERROR: $($_.Exception.Message)"
